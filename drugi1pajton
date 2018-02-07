@@ -1,0 +1,251 @@
+1zadatak
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 26 13:34:29 2018
+
+@author: student
+"""
+
+class Vektor:
+    def __init__(self, prikaz):
+        self.prikaz = prikaz
+    def skalarni_produkt(self,L):
+        """
+        (Vektor, Vektor)->(Int)
+        Funkcija prima dva vektora, te vraća njihov skalarni produkt.
+        >>> v1 = Vektor([1,2,3])
+        >>> v2 = Vektor([3,2,1]) 
+        >>> v1.skalarni_produkt(v1)
+        14
+        >>> v1.skalarni_produkt(v2)
+        10
+        """
+        
+        
+        sum = 0
+        for i in range(len(self.prikaz)):
+            sum += self.prikaz[i]*L.prikaz[i]
+        return sum
+    
+    
+    def __eq__(self, V):
+        """
+        (Vektor, Vektor)->(Bool)
+        Funkcija provjerava imaju li vektori jednak prikaz.
+        >>> v1 = Vektor([1,2,3])
+        >>> v2 = Vektor([3,2,1])
+        >>> v1 == v1
+        True
+        >>> v1 == v2
+        False
+        """
+        return self.prikaz == V.prikaz
+    
+    def __str__(self):
+        L = []
+        for a in self.prikaz:
+            L.append(str(a))
+        return 'Vektor s komponentama ({})'.format(' '.join(L))
+    
+   
+if __name__ == "__main__":
+    v = Vektor([1,2,3])
+    print(v)
+    v2 = Vektor([3,4,6])
+    v3 = Vektor([1,2,3])
+    print(v == v2)
+    print(v == v3)
+    print('v.v2=',v.skalarni_produkt(v2))
+    v4=Vektor([5,6])
+    print(v4)
+    import doctest
+    doctest.testmod()
+    
+    
+2zadatak
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 26 13:56:11 2018
+
+@author: student
+"""
+from math import factorial as fact
+def povrh(par):
+    n = par[0]
+    k = par[1]
+    return int((fact(n))/(fact(k)*fact(n-k)))
+
+def filter_povrh(L):
+    L1 = [(x,y) for x,y in L if x > y]
+    d = {}
+    for par in L1:
+        d[par] = povrh(par)
+    L2 = list(d.items())
+    L2.sort()
+    return L2
+
+if __name__ == '__main__':    
+    lista = [(12,5),(1,2),(4,3),(4,2),(5,2),(2,6),(1,7)]
+    print(filter_povrh(lista))
+
+2zadatakunittest
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 26 14:11:30 2018
+
+@author: student
+"""
+import unittest
+from zadatak2_IwanJosipovic import povrh, filter_povrh
+class Testpovrh(unittest.TestCase):
+    def test1(self):
+        stv = povrh((4,2))
+        ocekivani = 6
+        self.assertEqual(stv,ocekivani)
+        
+    def test2(self):
+        stv = povrh((4,3))
+        ocekivani = 4
+        self.assertEqual(stv,ocekivani)
+         
+class Testfilter(unittest.TestCase):
+    def Test1(self):
+        stv = filter_povrh([(12,5),(1,2),(4,3),(4,2),(5,2),(2,6),(1,7)])
+        ocek = [((4, 2), 6), ((4, 3), 4), ((5, 2), 10), ((12, 5), 792)]
+        self.assertEqual(stv, ocek)
+    def Test2(self):
+        stv = filter_povrh([])
+        ocek = []
+        self.assertEqual(stv,ocek)
+            
+if __name__=="__main__":
+    unittest.main()
+
+3zadatak
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 26 14:19:06 2018
+
+@author: student
+"""
+
+class Stog():
+    def __init__(self, s, maks):
+        self.s = s
+        self.maks = maks
+    def popStog(self):
+        t = None
+        try :
+            t = self.s[0]
+            del self.s[0]
+        except :
+            print('Stog je prazan, operacija se ne može izvršiti.')
+        if t != None:
+            return t
+    def pushStog(self, value):
+        try:
+            if len(self.s) == self.maks:
+                raise ValueError('Stog je pun, ne možemo dodati još jedan element')
+            else :
+                self.s.insert(0,value)
+        except:
+            print('Stog je pun, ne možemo dodati još jedan element')
+            
+st1= Stog([1,2],3)
+prvi = st1.popStog()
+print(prvi, st1.s)
+prvi = st1.popStog()
+print(prvi, st1.s)
+prvi = st1.popStog()
+print(prvi, st1.s)
+st1.pushStog(5)
+st1.pushStog(3)
+print(st1.s)
+st1.pushStog(2)
+st1.pushStog(4)       
+
+4zadatak
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 26 14:32:58 2018
+
+@author: student
+"""
+from time import sleep
+from random import randrange, randint
+import threading
+L = threading.Lock()
+class BankovniRacun:
+    def __init__(self, stanje):
+        self.stanje = stanje
+    def uplata(self, n):
+        L.acquire()
+        self.stanje += n
+        L.release()
+        print('Trenutno stanje računa: {}kn'.format(self.stanje))
+    def isplata(self, n):
+        if self.stanje < n:
+            print('Na računu nema dovoljno sredstava za isplatu.')
+        else:
+            L.acquire()
+            self.stanje -= n
+            L.release()
+        print('Trenutno stanje računa: {}kn'.format(self.stanje))
+        
+def uplatiOdjednom (br):
+    for i in range(30):
+        br.uplata(randint(50,200))
+        sleep(randrange(0,4))
+def isplatiOdjednom (br):
+    for i in range(20):
+        br.isplata(randint(100,500))
+        sleep(randrange(0,4))
+    
+        
+   
+if __name__ == '__main__':
+    BR  = BankovniRacun(1000)
+    t1 = threading.Thread(target = uplatiOdjednom, args = (BR,))
+    t2 = threading.Thread(target = isplatiOdjednom, args = (BR,))
+    t1.start()
+    t2.start()
+    t1.join()
+    t2.join()
+    print('Završno stanje računa je : {}kn'.format(BR.stanje))
+
+5zadatak
+
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Jan 26 14:47:42 2018
+
+@author: student
+"""
+
+import pandas as pd
+from matplotlib import pyplot as plt
+djelatnici = pd.read_csv('djelatnici.csv')
+print(list(set(djelatnici)))
+print(djelatnici.head(3))
+plt.hist(djelatnici.visina)
+plt.xlabel('visina (cm)')
+plt.title('Visine djelatnika')
+plt.show()
+
+djelatniciZ = djelatnici[djelatnici.spol == 'Z']
+djelatniciM = djelatnici[djelatnici.spol == 'M']
+plt.plot( djelatniciZ.dob,djelatniciZ.placa_prije,'s')
+plt.plot( djelatniciM.dob,djelatniciM.placa_prije,'s')
+plt.legend(['Z','M'])
+plt.savefig('graf1')
+
+
+        
+          
+        
+        
